@@ -18,12 +18,7 @@ import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
 import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
-<<<<<<< HEAD
 import HomeScreen from "../screens/HomeScreen";
-=======
-import TabOneScreen from "../screens/TabOneScreen";
-import TabTwoScreen from "../screens/TabTwoScreen";
->>>>>>> add tab Notification whith icon
 import Notifications from "../screens/Notifications";
 import {
   RootStackParamList,
