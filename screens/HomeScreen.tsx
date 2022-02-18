@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView } from "react-native";
 import { Text, View } from '../components/Themed';
 import { RootTabScreenProps } from '../types';
 import Project from '../components/Project';
@@ -6,7 +6,7 @@ import image from '../constants/Images';
 
 export default function HomeScreen({ navigation }: RootTabScreenProps<'Projets'>) {
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.projectsWrapper}>
         <Project
           title={"Express projet"}
@@ -19,7 +19,7 @@ export default function HomeScreen({ navigation }: RootTabScreenProps<'Projets'>
           leader={image.avatar_4}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
