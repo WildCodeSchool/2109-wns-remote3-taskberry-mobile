@@ -9,6 +9,7 @@ export default function Notifications() {
   return (
     <View style={styles.container}>
       <NotificationsCard text={textNotif} date={dateNotif} />
+      <NotificationsCard text={textNotif} date={dateNotif} />
     </View>
   );
 }
