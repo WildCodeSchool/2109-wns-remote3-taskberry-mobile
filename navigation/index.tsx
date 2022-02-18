@@ -80,16 +80,25 @@ function BottomTabNavigator() {
   return (
     <BottomTab.Navigator
       initialRouteName="Projets"
-      screenOptions={{
+      screenOptions={({ route }) => ({
         tabBarActiveTintColor: Colors[colorScheme].purple,
-      }}
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "Notifications") {
+            iconName = focused ? "notifications" : "notifications-outline";
+          } else if (route.name === "Projets") {
+            iconName = focused ? "home" : "home-outline";
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
     >
       <BottomTab.Screen
         name="Projets"
         component={HomeScreen}
         options={({ navigation }: RootTabScreenProps<"Projets">) => ({
           title: "Projets",
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         })}
       />
       <BottomTab.Screen
