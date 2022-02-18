@@ -41,7 +41,7 @@ const Project = (props: any) => {
     }
 
   return (
-    <View style={styles.item}>
+    <TouchableOpacity style={styles.item}>
       <View style={styles.lign1}>
         <View style={styles.description}>
           <Text style={styles.projectTitle}>{props.title}</Text>
@@ -59,18 +59,17 @@ const Project = (props: any) => {
           />
         </View>
       </View>
-      <View >
+      <View>
         <Text>Équipe :</Text>
-          <FlatList
-            data={members}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => `${item.id}`}
-            renderItem={renderItem}
-          />
-        
+        <FlatList
+          data={members}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => `${item.id}`}
+          renderItem={renderItem}
+        />
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
