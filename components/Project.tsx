@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, FC } from "react";
 import {
   Text,
   View,
@@ -11,7 +11,13 @@ import color from "../constants/Colors";
 import image from "../constants/Images";
 import { format } from "date-fns";
 
-const Project = (props: any) => {
+interface ProjectProps {
+  date: string;
+  title: string;
+  leader: any;
+}
+
+const Project: FC<ProjectProps> = ({ date, title, leader }) => {
   const membersData = [
     {
       id: 1,
@@ -51,10 +57,10 @@ const Project = (props: any) => {
     <TouchableOpacity style={styles.item}>
       <View style={styles.lign1}>
         <View style={styles.description}>
-          <Text style={styles.projectTitle}>{props.title}</Text>
-          {props.date && (
+          <Text style={styles.projectTitle}>{title}</Text>
+          {date && (
             <Text style={styles.projectDate}>
-              Date: {format(new Date(props.date), "d-MM-yyyy")}
+              Date: {format(new Date(date), "d-MM-yyyy")}
             </Text>
           )}
         </View>
@@ -79,7 +85,7 @@ const Project = (props: any) => {
         <View style={{ alignItems: "center" }}>
           <Text>Chef de projet :</Text>
           <Image
-            source={props.leader}
+            source={leader}
             resizeMode="contain"
             style={{
               width: 50,
