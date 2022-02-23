@@ -20,6 +20,7 @@ import ModalScreen from "../screens/ModalScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 import HomeScreen from "../screens/HomeScreen";
 import Notifications from "../screens/Notifications";
+import TicketsScreen from "../screens/TicketsScreen";
 import {
   RootStackParamList,
   RootTabParamList,
@@ -89,6 +90,8 @@ function BottomTabNavigator() {
             iconName = focused ? "notifications" : "notifications-outline";
           } else if (route.name === "Projets") {
             iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "Tickets") {
+            iconName = focused ? "checkmark-done" : "checkmark-done-outline";
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -100,6 +103,13 @@ function BottomTabNavigator() {
         options={({ navigation }: RootTabScreenProps<"Projets">) => ({
           title: "Projets",
         })}
+      />
+      <BottomTab.Screen
+        name="Tickets"
+        component={TicketsScreen}
+        options={{
+          title: "Tickets",
+        }}
       />
       <BottomTab.Screen
         name="Notifications"
