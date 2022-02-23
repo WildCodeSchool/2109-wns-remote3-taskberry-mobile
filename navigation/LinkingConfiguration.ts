@@ -25,6 +25,11 @@ const linking: LinkingOptions<RootStackParamList> = {
               Notifications: "notification",
             },
           },
+          Tickets: {
+            screens: {
+              TicketsScreen: "ticket",
+            },
+          },
         },
       },
       Modal: "modal",
