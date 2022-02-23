@@ -1,52 +1,81 @@
-import * as React from "react";
-import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
 import color from "../constants/Colors";
 import image from "../constants/Images";
+import { format } from "date-fns";
 
 const Project = (props: any) => {
+  const membersData = [
+    {
+      id: 1,
+      name: "Anne",
+      icon: image.avatar_1,
+    },
+    {
+      id: 2,
+      name: "Jane",
+      icon: image.avatar_2,
+    },
+    {
+      id: 3,
+      name: "John",
+      icon: image.avatar_3,
+    },
+  ];
 
-     const membersData = [
-        {
-            id: 1,
-            name: "Anne",
-            icon: image.avatar_1,
-        },
-        {
-            id: 2,
-            name: "Jane",
-            icon: image.avatar_2,
-        },
-        {
-            id: 3,
-            name: "John",
-            icon: image.avatar_3,
-        }
-     ]
-    
-    const [members, setMembers] = React.useState(membersData);
+  const [members, setMembers] = useState(membersData);
 
-    const renderItem = ({item} : any)=> {
-        return (
-            <View>
-                <Image
-                   source={item.icon} 
-                   resizeMode = "contain"
-                   style = {{
-                       width : 50,
-                       height : 50,
-                   }}
-                />
-            </View>
-        )
-    }
+  const renderItem = ({ item }: any) => {
+    return (
+      <View>
+        <Image
+          source={item.icon}
+          resizeMode="contain"
+          style={{
+            width: 50,
+            height: 50,
+          }}
+        />
+      </View>
+    );
+  };
 
   return (
     <TouchableOpacity style={styles.item}>
       <View style={styles.lign1}>
         <View style={styles.description}>
           <Text style={styles.projectTitle}>{props.title}</Text>
-          <Text style={styles.projectDate}>Date : {props.date}</Text>
+          {props.date && (
+            <Text style={styles.projectDate}>
+              Date: {format(new Date(props.date), "d-MM-yyyy")}
+            </Text>
+          )}
         </View>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <View>
+          <Text>Équipe :</Text>
+          <FlatList
+            data={members}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => `${item.id}`}
+            renderItem={renderItem}
+          />
+        </View>
+
         <View style={{ alignItems: "center" }}>
           <Text>Chef de projet :</Text>
           <Image
@@ -58,16 +87,6 @@ const Project = (props: any) => {
             }}
           />
         </View>
-      </View>
-      <View>
-        <Text>Équipe :</Text>
-        <FlatList
-          data={members}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => `${item.id}`}
-          renderItem={renderItem}
-        />
       </View>
     </TouchableOpacity>
   );
@@ -97,5 +116,5 @@ const styles = StyleSheet.create({
   projectDate: {
     fontSize: 12,
     marginBottom: 20,
-  }
+  },
 });
