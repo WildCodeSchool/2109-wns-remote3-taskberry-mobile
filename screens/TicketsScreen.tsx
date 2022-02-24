@@ -4,11 +4,42 @@ import TicketColumn from "../components/TicketColumn";
 import color from "../constants/Colors";
 // @ts-ignore
 import RNAnimatedScrollIndicators from "react-native-animated-scroll-indicators";
-import React from "react";
+import { useContext, useEffect } from "react";
+import { useQuery } from "@apollo/client";
+import API from "../constants/API";
+import { ProjectContext } from "../providers/ProjectProvider";
+import { TicketContext } from "../providers/TicketProvider";
+import AppLoading from "expo-app-loading";
 
 export default function TicketsScreen() {
+  const { projectId } = useContext(ProjectContext);
+  const { tickets, setTickets } = useContext(TicketContext);
   const scrollX = new Animated.Value(0);
   let screenWidth = Dimensions.get("window").width;
+
+  const { error, data, loading } = useQuery<
+    ProjectTicketsData,
+    ProjectTicketsVariables
+  >(API.query.GET_PROJECT_TICKETS, {
+    variables: {
+      projectId: Number(projectId),
+    },
+    pollInterval: 500,
+  });
+
+  useEffect(() => {
+    if (data && data.getProjectTickets) {
+      setTickets(data.getProjectTickets);
+    }
+  }, [data]);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (loading) {
+    return <AppLoading />;
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -28,10 +59,22 @@ export default function TicketsScreen() {
         )}
         overScrollMode="never"
       >
-        <TicketColumn title="À faire" />
-        <TicketColumn title="En cours" />
-        <TicketColumn title="Review" />
-        <TicketColumn title="Terminé" />
+        <TicketColumn
+          title="À faire"
+          tickets={tickets?.filter((e) => e.statusId === 1)}
+        />
+        <TicketColumn
+          title="En cours"
+          tickets={tickets?.filter((e) => e.statusId === 2)}
+        />
+        <TicketColumn
+          title="Review"
+          tickets={tickets?.filter((e) => e.statusId === 3)}
+        />
+        <TicketColumn
+          title="Terminé"
+          tickets={tickets?.filter((e) => e.statusId === 4)}
+        />
       </Animated.ScrollView>
       <View style={styles.indicator}>
         <RNAnimatedScrollIndicators
