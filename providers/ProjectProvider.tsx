@@ -1,37 +1,38 @@
-import { createContext, FC, useEffect, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { gql, useQuery } from "@apollo/client";
+import API from "../constants/API";
 
 interface IProjectContext {
   projects: Project[] | [] | null;
+  projectId: number | null;
+  setProjectId: Dispatch<SetStateAction<number | null>>;
 }
 
 const defaultContextValues: IProjectContext = {
   projects: null,
+  projectId: null,
+  setProjectId: () => {},
 };
-
-const GET_USER_PROJECTS = gql`
-  query GetUsers($userId: Float!) {
-    getUserProjects(userId: $userId) {
-      id
-      name
-      description
-      createdAt
-      finishedAt
-      estimateEndAt
-    }
-  }
-`;
 
 export const ProjectContext =
   createContext<IProjectContext>(defaultContextValues);
 
-export const ProjectProvider: FC = ({ children }: any) => {
+export const ProjectProvider: FC<{ children: any }> = ({ children }: any) => {
   const [projects, setProjects] = useState(null);
+  const [projectId, setProjectId] = useState<number | null>(null);
 
-  const { error, data } = useQuery(GET_USER_PROJECTS, {
+  const { error, data } = useQuery(API.query.GET_USER_PROJECTS, {
     variables: {
       userId: 1,
     },
+    pollInterval: 500,
   });
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export const ProjectProvider: FC = ({ children }: any) => {
   }, [data, error]);
 
   return (
-    <ProjectContext.Provider value={{ projects }}>
+    <ProjectContext.Provider value={{ projects, projectId, setProjectId }}>
       {children}
     </ProjectContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { useState, FC } from "react";
+import { useState, FC, useContext } from "react";
 import {
   Text,
   View,
@@ -10,33 +10,48 @@ import {
 import color from "../constants/Colors";
 import image from "../constants/Images";
 import { format } from "date-fns";
+import { ProjectContext } from "../providers/ProjectProvider";
+
+const membersData = [
+  {
+    id: 1,
+    name: "Anne",
+    icon: image.avatar_1,
+  },
+  {
+    id: 2,
+    name: "Jane",
+    icon: image.avatar_2,
+  },
+  {
+    id: 3,
+    name: "John",
+    icon: image.avatar_3,
+  },
+];
 
 interface ProjectProps {
+  projectId: number;
   date: string;
   title: string;
   leader: any;
+  navigation: any;
 }
 
-const Project: FC<ProjectProps> = ({ date, title, leader }) => {
-  const membersData = [
-    {
-      id: 1,
-      name: "Anne",
-      icon: image.avatar_1,
-    },
-    {
-      id: 2,
-      name: "Jane",
-      icon: image.avatar_2,
-    },
-    {
-      id: 3,
-      name: "John",
-      icon: image.avatar_3,
-    },
-  ];
-
+const Project: FC<ProjectProps> = ({
+  date,
+  title,
+  leader,
+  projectId,
+  navigation,
+}) => {
   const [members, setMembers] = useState(membersData);
+  const { setProjectId } = useContext(ProjectContext);
+
+  const handlePressProject = () => {
+    setProjectId(projectId);
+    navigation.navigate("Tickets");
+  };
 
   const renderItem = ({ item }: any) => {
     return (
@@ -54,7 +69,7 @@ const Project: FC<ProjectProps> = ({ date, title, leader }) => {
   };
 
   return (
-    <TouchableOpacity style={styles.item}>
+    <TouchableOpacity style={styles.item} onPress={handlePressProject}>
       <View style={styles.lign1}>
         <View style={styles.description}>
           <Text style={styles.projectTitle}>{title}</Text>

@@ -16,6 +16,8 @@ export default function HomeScreen({
         title={item.name}
         date={item.createdAt}
         leader={image.avatar_4}
+        projectId={item.id}
+        navigation={navigation}
       />
     );
   };
