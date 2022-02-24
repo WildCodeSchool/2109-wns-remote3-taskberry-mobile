@@ -1,15 +1,24 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import color from "../constants/Colors";
+import { TicketContext } from "../providers/TicketProvider";
 
 interface TicketProps {
   leader: any;
   title: string;
+  navigation: any;
+  ticketData: Ticket;
 }
 
-const Ticket: FC<TicketProps> = ({ leader, title }) => {
+const Ticket: FC<TicketProps> = ({ leader, title, navigation, ticketData }) => {
+  const { ticket, setTicket } = useContext(TicketContext);
+  const handlePressTicket = () => {
+    navigation.navigate("DetailTicket");
+    setTicket(ticketData);
+  };
+
   return (
-    <TouchableOpacity style={styles.item}>
+    <TouchableOpacity style={styles.item} onPress={handlePressTicket}>
       <View style={styles.lign1}>
         <Text style={styles.ticketTitle}>{title}</Text>
       </View>

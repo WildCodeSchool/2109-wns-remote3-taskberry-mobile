@@ -1,5 +1,6 @@
 import { StyleSheet, Dimensions, Animated, SafeAreaView } from "react-native";
 import { View } from "../components/Themed";
+import { RootTabScreenProps } from "../types";
 import TicketColumn from "../components/TicketColumn";
 import color from "../constants/Colors";
 // @ts-ignore
@@ -11,7 +12,9 @@ import { ProjectContext } from "../providers/ProjectProvider";
 import { TicketContext } from "../providers/TicketProvider";
 import AppLoading from "expo-app-loading";
 
-export default function TicketsScreen() {
+export default function TicketsScreen({
+  navigation,
+}: RootTabScreenProps<"Tickets">) {
   const { projectId } = useContext(ProjectContext);
   const { tickets, setTickets } = useContext(TicketContext);
   const scrollX = new Animated.Value(0);
@@ -62,18 +65,22 @@ export default function TicketsScreen() {
         <TicketColumn
           title="À faire"
           tickets={tickets?.filter((e) => e.statusId === 1)}
+          navigation={navigation}
         />
         <TicketColumn
           title="En cours"
           tickets={tickets?.filter((e) => e.statusId === 2)}
+          navigation={navigation}
         />
         <TicketColumn
           title="Review"
           tickets={tickets?.filter((e) => e.statusId === 3)}
+          navigation={navigation}
         />
         <TicketColumn
           title="Terminé"
           tickets={tickets?.filter((e) => e.statusId === 4)}
+          navigation={navigation}
         />
       </Animated.ScrollView>
       <View style={styles.indicator}>

@@ -20,6 +20,7 @@ import NotFoundScreen from "../screens/NotFoundScreen";
 import HomeScreen from "../screens/HomeScreen";
 import Notifications from "../screens/Notifications";
 import TicketsScreen from "../screens/TicketsScreen";
+import DetailTicket from "../screens/DetailTicket";
 import {
   RootStackParamList,
   RootTabParamList,
@@ -62,6 +63,11 @@ function RootNavigator() {
         name="Tickets"
         component={TicketsScreen}
         options={{ title: "Tickets" }}
+      />
+      <Stack.Screen
+        name="DetailTicket"
+        component={DetailTicket}
+        options={{ title: "Détail du ticket" }}
       />
       <Stack.Screen
         name="NotFound"
