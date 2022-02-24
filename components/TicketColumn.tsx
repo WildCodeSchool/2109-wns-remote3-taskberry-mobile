@@ -7,16 +7,26 @@ import image from "../constants/Images";
 interface TicketColumnProps {
   title: string;
   tickets: Ticket[] | undefined;
+  navigation: any;
 }
 
 interface TicketItem {
   item: Ticket;
 }
 
-const TicketColumn: FC<TicketColumnProps> = ({ title, tickets }) => {
+const TicketColumn: FC<TicketColumnProps> = ({
+  title,
+  tickets,
+  navigation,
+}) => {
   const TicketItem: FC<TicketItem> = ({ item }: TicketItem) => {
     return (
-      <Ticket leader={image.avatar_4} title={`#${item.id} ${item.name}`} />
+      <Ticket
+        leader={image.avatar_4}
+        title={`#${item.id} ${item.name}`}
+        ticketData={item}
+        navigation={navigation}
+      />
     );
   };
 
