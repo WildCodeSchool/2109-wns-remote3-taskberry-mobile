@@ -10,22 +10,11 @@ import {
   Modal,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import image from "../constants/Images";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
-
-const ticketData = {
-  id: 1,
-  name: "#17 Intégrer l’icône de notifications",
-  description:
-    "Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt nostrum alias cum. Vero aspernatur rerum expedita at suscipit quas blanditiis dolorum vel molestiae.",
-  createdAt: Date.now(),
-  finishedAt: Date.now(),
-  projectId: 1,
-  statusId: 2,
-  assigneeId: 1,
-};
+import { TicketContext } from "../providers/TicketProvider";
 
 const messages = [
   {
@@ -83,7 +72,9 @@ const renderMessage = ({ item }: any): JSX.Element => {
 };
 
 const DetailTicket = (): JSX.Element => {
-  const [selectedValue, setSelectedValue] = useState(ticketData.statusId);
+  const { ticket, setTicket } = useContext(TicketContext);
+
+  const [selectedValue, setSelectedValue] = useState(ticket?.statusId);
   const [asset1, setAsset1] = useState(null);
   const [asset2, setAsset2] = useState(null);
   const [asset, setAsset] = useState<number | null>(null);
@@ -170,13 +161,7 @@ const DetailTicket = (): JSX.Element => {
         alignItems: "center",
       }}
     >
-      <Ionicons
-        name="chevron-back-outline"
-        style={styles.iconBack}
-        size={48}
-        color="black"
-      />
-      <Text style={styles.title}>{ticketData.name}</Text>
+      <Text style={styles.title}>{ticket?.name}</Text>
       <View
         style={{
           justifyContent: "space-evenly",
@@ -189,10 +174,10 @@ const DetailTicket = (): JSX.Element => {
       >
         <Text>
           <AntDesign name="clockcircleo" size={20} color="black" />
-          <Text style={styles.text}> Fin prévue: {ticketData.finishedAt}</Text>
+          <Text style={styles.text}> Fin prévue: {ticket?.finishedAt}</Text>
         </Text>
         <Picker
-          selectedValue={selectedValue.toString()}
+          selectedValue={selectedValue?.toString()}
           style={{ height: 50, width: 130 }}
           onValueChange={(itemValue, itemIndex) => setSelectedValue(itemIndex)}
         >
@@ -203,7 +188,7 @@ const DetailTicket = (): JSX.Element => {
         </Picker>
       </View>
       <View style={styles.taskContainer}>
-        <Text style={styles.taskText}>{ticketData.description}</Text>
+        <Text style={styles.taskText}>{ticket?.description}</Text>
       </View>
       <View
         style={{
@@ -321,7 +306,7 @@ const styles = StyleSheet.create({
   chatContainer: {
     backgroundColor: "#E8E8E8",
     width: "90%",
-    height: 280,
+    height: 330,
     borderRadius: 10,
     marginTop: 30,
     padding: 10,
