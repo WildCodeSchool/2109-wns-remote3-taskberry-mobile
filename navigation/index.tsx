@@ -11,8 +11,7 @@ import {
   DarkTheme,
 } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import * as React from "react";
-import { ColorSchemeName, Pressable } from "react-native";
+import { ColorSchemeName } from "react-native";
 
 import Colors from "../constants/Colors";
 import useColorScheme from "../hooks/useColorScheme";
@@ -27,6 +26,8 @@ import {
   RootTabScreenProps,
 } from "../types";
 import LinkingConfiguration from "./LinkingConfiguration";
+import { useContext } from "react";
+import { ProjectContext } from "../providers/ProjectProvider";
 
 export default function Navigation({
   colorScheme,
@@ -56,6 +57,11 @@ function RootNavigator() {
         name="Root"
         component={BottomTabNavigator}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Tickets"
+        component={TicketsScreen}
+        options={{ title: "Tickets" }}
       />
       <Stack.Screen
         name="NotFound"
@@ -103,13 +109,6 @@ function BottomTabNavigator() {
         options={({ navigation }: RootTabScreenProps<"Projets">) => ({
           title: "Projets",
         })}
-      />
-      <BottomTab.Screen
-        name="Tickets"
-        component={TicketsScreen}
-        options={{
-          title: "Tickets",
-        }}
       />
       <BottomTab.Screen
         name="Notifications"

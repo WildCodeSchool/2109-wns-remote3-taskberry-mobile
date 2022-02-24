@@ -8,6 +8,7 @@ import { ProjectProvider } from "./providers/ProjectProvider";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 import Constants from "expo-constants";
 import AppLoading from "expo-app-loading";
+import { TicketProvider } from "./providers/TicketProvider";
 const { manifest } = Constants;
 
 const token = "";
@@ -33,12 +34,14 @@ export default function App() {
   } else {
     return (
       <ApolloProvider client={client}>
-        <ProjectProvider>
-          <SafeAreaProvider>
-            <Navigation colorScheme={colorScheme} />
-            <StatusBar />
-          </SafeAreaProvider>
-        </ProjectProvider>
+        <TicketProvider>
+          <ProjectProvider>
+            <SafeAreaProvider>
+              <Navigation colorScheme={colorScheme} />
+              <StatusBar />
+            </SafeAreaProvider>
+          </ProjectProvider>
+        </TicketProvider>
       </ApolloProvider>
     );
   }
