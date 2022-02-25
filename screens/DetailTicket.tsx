@@ -15,6 +15,7 @@ import image from "../constants/Images";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { TicketContext } from "../providers/TicketProvider";
+import { gql, useMutation } from "@apollo/client";
 
 const messages = [
   {
@@ -50,6 +51,20 @@ const messages = [
   },
 ];
 
+const UPDATE_TICKET = gql`
+  mutation Mutation($partialInput: PartialUpdateTicketInput!) {
+    updateTicket(partialInput: $partialInput) {
+      id
+      name
+      description
+      finishedAt
+      statusId
+      projectId
+      assigneeId
+    }
+  }
+`;
+
 const renderMessage = ({ item }: any): JSX.Element => {
   return (
     <View style={styles.bulleChat}>
@@ -73,12 +88,12 @@ const renderMessage = ({ item }: any): JSX.Element => {
 
 const DetailTicket = (): JSX.Element => {
   const { ticket, setTicket } = useContext(TicketContext);
-
   const [selectedValue, setSelectedValue] = useState(ticket?.statusId);
   const [asset1, setAsset1] = useState(null);
   const [asset2, setAsset2] = useState(null);
   const [asset, setAsset] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [updateTicket, { data, loading, error }] = useMutation(UPDATE_TICKET);
 
   const pickFile = async (num: number): Promise<void> => {
     // No permissions request is necessary for launching the image library
@@ -87,8 +102,6 @@ const DetailTicket = (): JSX.Element => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.cancelled) {
       if (asset === 1) {
@@ -116,6 +129,19 @@ const DetailTicket = (): JSX.Element => {
       }
     }
   };
+
+  const onChangeStatus = (status: number): void => {
+    updateTicket({
+      variables: {
+        partialInput: {
+          id: Number(ticket?.id),
+          statusId: status,
+        },
+      },
+    });
+    setSelectedValue(status);
+  };
+
   const pickImage = async (num: number): Promise<void> => {
     // No permissions request is necessary for launching the image library
     let result: any = await ImagePicker.launchCameraAsync({
@@ -123,8 +149,6 @@ const DetailTicket = (): JSX.Element => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     if (!result.cancelled) {
       if (asset === 1) {
@@ -179,12 +203,14 @@ const DetailTicket = (): JSX.Element => {
         <Picker
           selectedValue={selectedValue?.toString()}
           style={{ height: 50, width: 130 }}
-          onValueChange={(itemValue, itemIndex) => setSelectedValue(itemIndex)}
+          onValueChange={(itemValue, itemIndex) =>
+            onChangeStatus(Number(itemValue))
+          }
         >
-          <Picker.Item label="À faire" value="0" />
-          <Picker.Item label="En cours" value="1" />
-          <Picker.Item label="Review" value="2" />
-          <Picker.Item label="Validé" value="3" />
+          <Picker.Item label="À faire" value="1" />
+          <Picker.Item label="En cours" value="2" />
+          <Picker.Item label="Review" value="3" />
+          <Picker.Item label="Validé" value="4" />
         </Picker>
       </View>
       <View style={styles.taskContainer}>
@@ -295,7 +321,7 @@ const styles = StyleSheet.create({
   },
   taskContainer: {
     backgroundColor: "#E8E8E8",
-    width: "85%",
+    width: "90%",
     minHeight: 100,
     borderRadius: 10,
     marginTop: 30,
