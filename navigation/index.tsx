@@ -29,6 +29,7 @@ import {
 import LinkingConfiguration from "./LinkingConfiguration";
 import { useContext } from "react";
 import { ProjectContext } from "../providers/ProjectProvider";
+import { TicketContext } from "../providers/TicketProvider";
 
 export default function Navigation({
   colorScheme,
@@ -52,6 +53,8 @@ export default function Navigation({
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+  const { ticket } = useContext(TicketContext);
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -59,15 +62,11 @@ function RootNavigator() {
         component={BottomTabNavigator}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="Tickets"
-        component={TicketsScreen}
-        options={{ title: "Tickets" }}
-      />
+      <Stack.Screen name="Tickets" component={TicketsScreen} />
       <Stack.Screen
         name="DetailTicket"
         component={DetailTicket}
-        options={{ title: "Détail du ticket" }}
+        options={{ title: ticket?.name }}
       />
       <Stack.Screen
         name="NotFound"
