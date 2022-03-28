@@ -30,4 +30,19 @@ export default {
       }
     `,
   },
+  mutation: {
+    UPDATE_TICKET: gql`
+      mutation Mutation($partialInput: PartialUpdateTicketInput!) {
+        updateTicket(partialInput: $partialInput) {
+          id
+          name
+          description
+          finishedAt
+          statusId
+          projectId
+          assigneeId
+        }
+      }
+    `,
+  },
 };
