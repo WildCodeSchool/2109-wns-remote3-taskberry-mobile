@@ -16,6 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { TicketContext } from "../providers/TicketProvider";
 import { gql, useMutation } from "@apollo/client";
+import API from "../constants/API";
 
 const messages = [
   {
@@ -51,20 +52,6 @@ const messages = [
   },
 ];
 
-const UPDATE_TICKET = gql`
-  mutation Mutation($partialInput: PartialUpdateTicketInput!) {
-    updateTicket(partialInput: $partialInput) {
-      id
-      name
-      description
-      finishedAt
-      statusId
-      projectId
-      assigneeId
-    }
-  }
-`;
-
 const renderMessage = ({ item }: any): JSX.Element => {
   return (
     <View style={styles.bulleChat}>
@@ -93,7 +80,9 @@ const DetailTicket = (): JSX.Element => {
   const [asset2, setAsset2] = useState(null);
   const [asset, setAsset] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [updateTicket, { data, loading, error }] = useMutation(UPDATE_TICKET);
+  const [updateTicket, { data, loading, error }] = useMutation(
+    API.mutation.UPDATE_TICKET
+  );
 
   const pickFile = async (num: number): Promise<void> => {
     // No permissions request is necessary for launching the image library
@@ -185,7 +174,6 @@ const DetailTicket = (): JSX.Element => {
         alignItems: "center",
       }}
     >
-      <Text style={styles.title}>{ticket?.name}</Text>
       <View
         style={{
           justifyContent: "space-evenly",
