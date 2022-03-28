@@ -74,7 +74,7 @@ const renderMessage = ({ item }: any): JSX.Element => {
 };
 
 const DetailTicket = (): JSX.Element => {
-  const { ticket, setTicket } = useContext(TicketContext);
+  const { ticket } = useContext(TicketContext);
   const [selectedValue, setSelectedValue] = useState(ticket?.statusId);
   const [asset1, setAsset1] = useState(null);
   const [asset2, setAsset2] = useState(null);
