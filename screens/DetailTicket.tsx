@@ -64,10 +64,10 @@ const renderMessage = ({ item }: any): JSX.Element => {
         }}
       />
       <View>
-        <Text style={{ fontSize: 10 }}>
+        <Text style={styles.textInfoBulle}>
           By {item.username}, {item.date}
         </Text>
-        <Text style={{ textAlign: "left", width: 280 }}>{item.message}</Text>
+        <Text style={styles.messageBulle}>{item.message}</Text>
       </View>
     </View>
   );
@@ -403,5 +403,12 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     marginRight: 30,
+  },
+  textInfoBulle: {
+    fontSize: 10,
+  },
+  messageBulle: {
+    textAlign: "left",
+    width: 280,
   },
 });
