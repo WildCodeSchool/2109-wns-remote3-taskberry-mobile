@@ -11,7 +11,7 @@ interface TicketProps {
 }
 
 const Ticket: FC<TicketProps> = ({ leader, title, navigation, ticketData }) => {
-  const { ticket, setTicket } = useContext(TicketContext);
+  const { setTicket } = useContext(TicketContext);
   const handlePressTicket = () => {
     navigation.navigate("DetailTicket");
     setTicket(ticketData);
