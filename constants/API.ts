@@ -29,6 +29,15 @@ export default {
         }
       }
     `,
+
+    GET_PROJECT_MEMBERS: gql`
+      query Query($projectId: Float!) {
+        getProjectUsers(projectId: $projectId) {
+          email
+          profilePicture
+        }
+      }
+    `,
   },
   mutation: {
     UPDATE_TICKET: gql`
