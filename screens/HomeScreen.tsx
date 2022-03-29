@@ -29,6 +29,7 @@ export default function HomeScreen({
         renderItem={projectItem}
         contentContainerStyle={styles.contentContainer}
         overScrollMode="never"
+        keyExtractor={(item: Project) => item.id.toString()}
       />
     </View>
   );

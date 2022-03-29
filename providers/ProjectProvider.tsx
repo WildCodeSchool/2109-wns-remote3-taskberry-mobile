@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { gql, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import API from "../constants/API";
 
 interface IProjectContext {
