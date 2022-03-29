@@ -1,5 +1,6 @@
 import {
   View,
+  ScrollView,
   Text,
   StyleSheet,
   TextInput,
@@ -52,11 +53,11 @@ const messages = [
   },
 ];
 
-const renderMessage = ({ item }: any): JSX.Element => {
+const RenderMessage = ({ props }: any): JSX.Element => {
   return (
     <View style={styles.bulleChat}>
       <Image
-        source={item.avatar}
+        source={props.avatar}
         resizeMode="contain"
         style={{
           width: 50,
@@ -65,9 +66,9 @@ const renderMessage = ({ item }: any): JSX.Element => {
       />
       <View>
         <Text style={styles.textInfoBulle}>
-          By {item.username}, {item.date}
+          By {props.username}, {props.date}
         </Text>
-        <Text style={styles.messageBulle}>{item.message}</Text>
+        <Text style={styles.messageBulle}>{props.message}</Text>
       </View>
     </View>
   );
@@ -167,131 +168,147 @@ const DetailTicket = (): JSX.Element => {
   };
 
   return (
-    <View
-      style={{
-        backgroundColor: "white",
-        flex: 1,
-        alignItems: "center",
-      }}
-    >
+    <ScrollView>
       <View
         style={{
-          justifyContent: "space-evenly",
+          backgroundColor: "white",
+          flex: 1,
           alignItems: "center",
-          flexDirection: "row",
-          marginTop: 30,
-          width: "100%",
-          paddingHorizontal: 20,
         }}
       >
-        <Text>
-          <AntDesign name="clockcircleo" size={20} color="black" />
-          <Text style={styles.text}> Fin prévue: {ticket?.finishedAt}</Text>
-        </Text>
-        <Picker
-          selectedValue={selectedValue?.toString()}
-          style={{ height: 50, width: 130 }}
-          onValueChange={(itemValue, itemIndex) =>
-            onChangeStatus(Number(itemValue))
-          }
-        >
-          <Picker.Item label="À faire" value="1" />
-          <Picker.Item label="En cours" value="2" />
-          <Picker.Item label="Review" value="3" />
-          <Picker.Item label="Validé" value="4" />
-        </Picker>
-      </View>
-      <View style={styles.taskContainer}>
-        <Text style={styles.taskText}>{ticket?.description}</Text>
-      </View>
-      <View
-        style={{
-          justifyContent: "space-evenly",
-          flexDirection: "row",
-          marginTop: 30,
-          width: "100%",
-          paddingHorizontal: 30,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => {
-            setModalVisible(true);
-            setAsset(1);
+        <View
+          style={{
+            justifyContent: "space-evenly",
+            alignItems: "center",
+            flexDirection: "row",
+            marginTop: 30,
+            width: "100%",
+            paddingHorizontal: 20,
           }}
         >
           <Text>
-            <AntDesign name="download" size={24} color="black" />
-            <Text style={styles.text}> Asset 1</Text>
+            <AntDesign name="clockcircleo" size={20} color="black" />
+            <Text style={styles.text}> Fin prévue: {ticket?.finishedAt}</Text>
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => {
-            setModalVisible(true);
-            setAsset(2);
-          }}
-        >
-          <Text>
-            <AntDesign name="download" size={24} color="black" />
-            <Text style={styles.text}> Asset 2</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.chatContainer}>
-        <FlatList
-          data={messages}
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item: any) => `${item.id}`}
-          renderItem={renderMessage}
-        />
-        <View style={styles.chatTextInputContainer}>
-          <TextInput multiline={true} style={styles.chatTextInput}></TextInput>
-          <Pressable style={styles.button}>
-            <Ionicons name="send" size={18} color="white" />
-          </Pressable>
+          <Picker
+            selectedValue={selectedValue?.toString()}
+            style={{ height: 50, width: 130 }}
+            onValueChange={(itemValue, itemIndex) =>
+              onChangeStatus(Number(itemValue))
+            }
+          >
+            <Picker.Item label="À faire" value="1" />
+            <Picker.Item label="En cours" value="2" />
+            <Picker.Item label="Review" value="3" />
+            <Picker.Item label="Validé" value="4" />
+          </Picker>
         </View>
-      </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Pressable
-              style={styles.closeButtonModal}
-              onPress={() => setModalVisible(!modalVisible)}
-            >
-              <AntDesign name="close" size={24} color="black" />
+        <View style={styles.taskContainer}>
+          <Text style={styles.taskText}>{ticket?.description}</Text>
+        </View>
+        <View
+          style={{
+            justifyContent: "space-evenly",
+            flexDirection: "row",
+            marginTop: 30,
+            width: "100%",
+            paddingHorizontal: 30,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setModalVisible(true);
+              setAsset(1);
+            }}
+          >
+            <Text>
+              <AntDesign name="download" size={24} color="black" />
+              <Text style={styles.text}> Asset 1</Text>
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setModalVisible(true);
+              setAsset(2);
+            }}
+          >
+            <Text>
+              <AntDesign name="download" size={24} color="black" />
+              <Text style={styles.text}> Asset 2</Text>
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* START COMMENT */}
+
+        <View style={styles.chatContainer}>
+          {/* <FlatList
+            data={messages}
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item: any) => `${item.id}`}
+            renderItem={renderMessage}
+          /> */}
+          <ScrollView>
+            {messages.map((message, index) => (
+              <RenderMessage props={message} key={message.id} />
+            ))}
+          </ScrollView>
+          <View style={styles.chatTextInputContainer}>
+            <TextInput
+              multiline={true}
+              style={styles.chatTextInput}
+            ></TextInput>
+            <Pressable style={styles.button}>
+              <Ionicons name="send" size={18} color="white" />
             </Pressable>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                pickImage(1);
-                setModalVisible(!modalVisible);
-              }}
-            >
-              <Text>
-                <Ionicons name="camera" size={50} color="black" />
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                pickFile(2);
-                setModalVisible(!modalVisible);
-              }}
-            >
-              <Text>
-                <AntDesign name="download" size={50} color="black" />
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
-      </Modal>
-    </View>
+
+        {/* END COMMENT */}
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Pressable
+                style={styles.closeButtonModal}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+                <AntDesign name="close" size={24} color="black" />
+              </Pressable>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  pickImage(1);
+                  setModalVisible(!modalVisible);
+                }}
+              >
+                <Text>
+                  <Ionicons name="camera" size={50} color="black" />
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => {
+                  pickFile(2);
+                  setModalVisible(!modalVisible);
+                }}
+              >
+                <Text>
+                  <AntDesign name="download" size={50} color="black" />
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
+    </ScrollView>
   );
 };
 
