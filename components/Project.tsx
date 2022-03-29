@@ -1,34 +1,12 @@
-import { useState, FC, useContext } from "react";
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
+import { useState, FC, useContext, useEffect } from "react";
+import { Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
 import color from "../constants/Colors";
-import image from "../constants/Images";
 import { format } from "date-fns";
 import { ProjectContext } from "../providers/ProjectProvider";
-
-const membersData = [
-  {
-    id: 1,
-    name: "Anne",
-    icon: image.avatar_1,
-  },
-  {
-    id: 2,
-    name: "Jane",
-    icon: image.avatar_2,
-  },
-  {
-    id: 3,
-    name: "John",
-    icon: image.avatar_3,
-  },
-];
+import { useQuery } from "@apollo/client";
+import API from "../constants/API";
+import AppLoading from "expo-app-loading";
+import ProjectMemberStack from "./ProjectMemberStack";
 
 interface ProjectProps {
   projectId: number;
@@ -38,6 +16,11 @@ interface ProjectProps {
   navigation: any;
 }
 
+export interface Member {
+  email: string;
+  profilePicture: string;
+}
+
 const Project: FC<ProjectProps> = ({
   date,
   title,
@@ -45,7 +28,7 @@ const Project: FC<ProjectProps> = ({
   projectId,
   navigation,
 }) => {
-  const [members, setMembers] = useState(membersData);
+  const [projectMembers, setProjectMembers] = useState<Member[]>([]);
   const { setProjectId } = useContext(ProjectContext);
 
   const handlePressProject = () => {
@@ -53,24 +36,30 @@ const Project: FC<ProjectProps> = ({
     navigation.navigate("Tickets");
   };
 
-  const renderItem = ({ item }: any) => {
-    return (
-      <View>
-        <Image
-          source={item.icon}
-          resizeMode="contain"
-          style={{
-            width: 50,
-            height: 50,
-          }}
-        />
-      </View>
-    );
-  };
+  const { error, data, loading } = useQuery(API.query.GET_PROJECT_MEMBERS, {
+    variables: {
+      projectId: Number(projectId),
+    },
+    pollInterval: 500,
+  });
+
+  useEffect(() => {
+    if (data) {
+      const { getProjectUsers } = data;
+      setProjectMembers(getProjectUsers);
+    }
+    if (error) {
+      throw new Error(error.message);
+    }
+  }, [data, error]);
+
+  if (loading) {
+    return <AppLoading />;
+  }
 
   return (
-    <TouchableOpacity style={styles.item} onPress={handlePressProject}>
-      <View style={styles.lign1}>
+    <TouchableOpacity style={styles.projectItem} onPress={handlePressProject}>
+      <View style={styles.projectItemDetails}>
         <View style={styles.description}>
           <Text style={styles.projectTitle}>{title}</Text>
           {date && (
@@ -80,35 +69,26 @@ const Project: FC<ProjectProps> = ({
           )}
         </View>
       </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <View>
-          <Text>Équipe :</Text>
-          <FlatList
-            data={members}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => `${item.id}`}
-            renderItem={renderItem}
-          />
-        </View>
 
-        <View style={{ alignItems: "center" }}>
-          <Text>Chef de projet :</Text>
-          <Image
-            source={leader}
-            resizeMode="contain"
-            style={{
-              width: 50,
-              height: 50,
-            }}
-          />
+      {projectMembers && projectMembers.length > 0 && (
+        <View style={styles.projectItemDetails}>
+          <View style={styles.projectMembersContainer}>
+            <Text>Équipe :</Text>
+            <View style={{ flexDirection: "row" }}>
+              <ProjectMemberStack members={projectMembers} />
+            </View>
+          </View>
+
+          <View style={{ alignItems: "center" }}>
+            <Text>Chef de projet :</Text>
+            <Image
+              source={leader}
+              resizeMode="contain"
+              style={styles.placeholder}
+            />
+          </View>
         </View>
-      </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -116,7 +96,7 @@ const Project: FC<ProjectProps> = ({
 export default Project;
 
 const styles = StyleSheet.create({
-  item: {
+  projectItem: {
     backgroundColor: color.light.lightGrey,
     padding: 15,
     borderRadius: 10,
@@ -125,7 +105,7 @@ const styles = StyleSheet.create({
   description: {
     alignItems: "flex-start",
   },
-  lign1: {
+  projectItemDetails: {
     flexDirection: "row",
     justifyContent: "space-between",
   },
@@ -137,5 +117,13 @@ const styles = StyleSheet.create({
   projectDate: {
     fontSize: 12,
     marginBottom: 20,
+  },
+  placeholder: {
+    width: 40,
+    height: 40,
+  },
+  projectMembersContainer: {
+    flex: 1,
+    justifyContent: "flex-start",
   },
 });
