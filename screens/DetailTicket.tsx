@@ -11,13 +11,14 @@ import {
   Modal,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import image from "../constants/Images";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { TicketContext } from "../providers/TicketProvider";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import API from "../constants/API";
+import AppLoading from "expo-app-loading";
 
 const messages = [
   {
@@ -57,7 +58,7 @@ const RenderMessage = ({ props }: any): JSX.Element => {
   return (
     <View style={styles.bulleChat}>
       <Image
-        source={props.avatar}
+        source={props?.avatar}
         resizeMode="contain"
         style={{
           width: 50,
@@ -66,9 +67,9 @@ const RenderMessage = ({ props }: any): JSX.Element => {
       />
       <View>
         <Text style={styles.textInfoBulle}>
-          By {props.username}, {props.date}
+          By {props?.username}, {props.createdAt}
         </Text>
-        <Text style={styles.messageBulle}>{props.message}</Text>
+        <Text style={styles.messageBulle}>{props.description}</Text>
       </View>
     </View>
   );
@@ -81,9 +82,30 @@ const DetailTicket = (): JSX.Element => {
   const [asset2, setAsset2] = useState(null);
   const [asset, setAsset] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [updateTicket, { data, loading, error }] = useMutation(
-    API.mutation.UPDATE_TICKET
-  );
+  const [updateTicket] = useMutation(API.mutation.UPDATE_TICKET);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const { data, loading, error } = useQuery<
+    CommentsTicketData,
+    CommentsTicketVariables
+  >(API.query.GET_TICKET_COMMENTS, {
+    variables: {
+      ticketId: Number(ticket?.id),
+    },
+  });
+
+  useEffect(() => {
+    if (data) {
+      setComments(data.getTicketComments);
+    }
+  }, []);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (loading) {
+    return <AppLoading />;
+  }
 
   const pickFile = async (num: number): Promise<void> => {
     // No permissions request is necessary for launching the image library
@@ -242,15 +264,9 @@ const DetailTicket = (): JSX.Element => {
         {/* START COMMENT */}
 
         <View style={styles.chatContainer}>
-          {/* <FlatList
-            data={messages}
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item: any) => `${item.id}`}
-            renderItem={renderMessage}
-          /> */}
           <ScrollView>
-            {messages.map((message, index) => (
-              <RenderMessage props={message} key={message.id} />
+            {comments.map((comment, index) => (
+              <RenderMessage props={comment} key={comment.id} />
             ))}
           </ScrollView>
           <View style={styles.chatTextInputContainer}>
