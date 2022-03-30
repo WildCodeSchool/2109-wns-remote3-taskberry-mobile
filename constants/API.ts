@@ -38,6 +38,17 @@ export default {
         }
       }
     `,
+    GET_TICKET_COMMENTS: gql`
+      query Query($ticketId: Float!) {
+        getTicketComments(ticketId: $ticketId) {
+          id
+          description
+          createdAt
+          ticketId
+          userId
+        }
+      }
+    `,
   },
   mutation: {
     UPDATE_TICKET: gql`
