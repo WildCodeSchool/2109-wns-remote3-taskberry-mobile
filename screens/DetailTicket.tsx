@@ -55,7 +55,6 @@ const DetailTicket = (): JSX.Element => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [updateTicket] = useMutation(API.mutation.UPDATE_TICKET);
   const [addComment] = useMutation(API.mutation.CREATE_COMMENT);
-  const [comments, setComments] = useState<Comment[] | undefined>([]);
   const [message, setMessage] = useState<string>("");
   const { data, loading, error } = useQuery<
     CommentsTicketData,
