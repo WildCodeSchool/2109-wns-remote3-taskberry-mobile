@@ -10,6 +10,8 @@ import Constants from "expo-constants";
 import AppLoading from "expo-app-loading";
 import { TicketProvider } from "./providers/TicketProvider";
 const { manifest } = Constants;
+import "intl";
+import "intl/locale-data/jsonp/fr";
 
 const token = "";
 let uri;
