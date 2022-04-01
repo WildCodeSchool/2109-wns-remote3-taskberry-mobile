@@ -16,58 +16,29 @@ import image from "../constants/Images";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { TicketContext } from "../providers/TicketProvider";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 import API from "../constants/API";
 import AppLoading from "expo-app-loading";
-
-const messages = [
-  {
-    id: 1,
-    avatar: image.avatar_3,
-    username: "John",
-    date: "15h00 28/10/2021",
-    message:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ip",
-  },
-  {
-    id: 2,
-    avatar: image.avatar_1,
-    username: "Anne",
-    date: "15h10 28/10/2021",
-    message: "Lorem Ipsum is simply dummy",
-  },
-  {
-    id: 3,
-    avatar: image.avatar_2,
-    username: "Jane",
-    date: "15h13 28/10/2021",
-    message:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt nostrum alias cum. Vero aspernatur rerum expedita at suscipit quas blanditiis dolorum vel molestiae.",
-  },
-  {
-    id: 4,
-    avatar: image.avatar_4,
-    username: "Mark",
-    date: "16h00 28/10/2021",
-    message:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Incidunt nostrum alias cum. Vero aspernatur",
-  },
-];
+import { DateTime } from "luxon";
 
 const RenderMessage = ({ props }: any): JSX.Element => {
   return (
     <View style={styles.bulleChat}>
       <Image
-        source={props?.avatar}
-        resizeMode="contain"
-        style={{
-          width: 50,
-          height: 50,
+        source={{
+          uri: props?.User.profilePicture
+            ? props?.User.profilePicture
+            : image.avatar_4,
         }}
+        resizeMode="contain"
+        style={{ width: 35, height: 35, borderRadius: 100 }}
       />
-      <View>
+      <View style={styles.messageContainer}>
         <Text style={styles.textInfoBulle}>
-          By {props?.username}, {props.createdAt}
+          par {props?.User.firstName},{" "}
+          {DateTime.fromISO(props.createdAt)
+            .setLocale("fr")
+            .toLocaleString(DateTime.DATETIME_SHORT)}
         </Text>
         <Text style={styles.messageBulle}>{props.description}</Text>
       </View>
@@ -83,7 +54,9 @@ const DetailTicket = (): JSX.Element => {
   const [asset, setAsset] = useState<number | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [updateTicket] = useMutation(API.mutation.UPDATE_TICKET);
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [addComment] = useMutation(API.mutation.CREATE_COMMENT);
+  const [comments, setComments] = useState<Comment[] | undefined>([]);
+  const [message, setMessage] = useState<string>("");
   const { data, loading, error } = useQuery<
     CommentsTicketData,
     CommentsTicketVariables
@@ -92,12 +65,6 @@ const DetailTicket = (): JSX.Element => {
       ticketId: Number(ticket?.id),
     },
   });
-
-  useEffect(() => {
-    if (data) {
-      setComments(data.getTicketComments);
-    }
-  }, []);
 
   if (error) {
     throw new Error(error.message);
@@ -152,6 +119,30 @@ const DetailTicket = (): JSX.Element => {
       },
     });
     setSelectedValue(status);
+  };
+
+  const handlePressMessage = (): void => {
+    addComment({
+      variables: {
+        commentInput: {
+          description: message,
+          createdAt: new Date(),
+          ticketId: Number(ticket?.id),
+          userId: Number(1),
+        },
+      },
+      refetchQueries: [
+        {
+          query: API.query.GET_TICKET_COMMENTS,
+          variables: { ticketId: Number(ticket?.id) },
+        },
+      ],
+      awaitRefetchQueries: true,
+    })
+      .then(() => {
+        setMessage("");
+      })
+      .catch((err) => console.log(err));
   };
 
   const pickImage = async (num: number): Promise<void> => {
@@ -265,16 +256,18 @@ const DetailTicket = (): JSX.Element => {
 
         <View style={styles.chatContainer}>
           <ScrollView>
-            {comments.map((comment, index) => (
+            {data?.getTicketComments?.map((comment, index) => (
               <RenderMessage props={comment} key={comment.id} />
             ))}
           </ScrollView>
           <View style={styles.chatTextInputContainer}>
             <TextInput
+              value={message}
+              onChangeText={(text) => setMessage(text)}
               multiline={true}
               style={styles.chatTextInput}
             ></TextInput>
-            <Pressable style={styles.button}>
+            <Pressable style={styles.button} onPress={handlePressMessage}>
               <Ionicons name="send" size={18} color="white" />
             </Pressable>
           </View>
@@ -443,5 +436,8 @@ const styles = StyleSheet.create({
   messageBulle: {
     textAlign: "left",
     width: 280,
+  },
+  messageContainer: {
+    marginLeft: 5,
   },
 });

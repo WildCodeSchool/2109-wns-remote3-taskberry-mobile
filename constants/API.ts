@@ -46,6 +46,10 @@ export default {
           createdAt
           ticketId
           userId
+          User {
+            profilePicture
+            firstName
+          }
         }
       }
     `,
@@ -61,6 +65,21 @@ export default {
           statusId
           projectId
           assigneeId
+        }
+      }
+    `,
+    CREATE_COMMENT: gql`
+      mutation Mutation($commentInput: CommentInput!) {
+        createComment(commentInput: $commentInput) {
+          id
+          description
+          createdAt
+          ticketId
+          userId
+          User {
+            profilePicture
+            firstName
+          }
         }
       }
     `,
