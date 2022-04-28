@@ -12,6 +12,9 @@ import { TicketProvider } from "./providers/TicketProvider";
 const { manifest } = Constants;
 import "intl";
 import "intl/locale-data/jsonp/fr";
+import { LogBox } from "react-native";
+import React from "react";
+LogBox.ignoreLogs(["Setting a timer"]);
 
 const token = "";
 let uri;
