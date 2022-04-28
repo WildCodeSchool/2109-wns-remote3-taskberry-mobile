@@ -38,6 +38,7 @@ export default {
         }
       }
     `,
+
     GET_TICKET_COMMENTS: gql`
       query Query($ticketId: Float!) {
         getTicketComments(ticketId: $ticketId) {
@@ -50,6 +51,19 @@ export default {
             profilePicture
             firstName
           }
+        }
+      }
+    `,
+
+    GET_TICKET_MEDIA: gql`
+      query Query($ticketId: Float!) {
+        getTicketMedia(ticketId: $ticketId) {
+          id
+          name
+          type
+          url
+          createdAt
+          ticketId
         }
       }
     `,
@@ -68,6 +82,7 @@ export default {
         }
       }
     `,
+
     CREATE_COMMENT: gql`
       mutation Mutation($commentInput: CommentInput!) {
         createComment(commentInput: $commentInput) {
@@ -81,6 +96,23 @@ export default {
             firstName
           }
         }
+      }
+    `,
+
+    CREATE_MEDIA: gql`
+      mutation Mutation($mediaInput: MediaInput!) {
+        createMedia(mediaInput: $mediaInput) {
+          id
+          url
+          createdAt
+          ticketId
+        }
+      }
+    `,
+
+    DELETE_MEDIA: gql`
+      mutation Mutation($mediaId: Float!) {
+        deleteMedia(mediaId: $mediaId)
       }
     `,
   },
