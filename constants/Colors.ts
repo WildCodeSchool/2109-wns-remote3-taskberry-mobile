@@ -11,6 +11,8 @@ export default {
     lightGrey: "#F3F3F3",
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorLight,
+    green: "#27ae60",
+    red: "#b33939",
   },
   dark: {
     text: "#fff",
@@ -21,5 +23,7 @@ export default {
     lightGrey: "#F3F3F3",
     tabIconDefault: "#ccc",
     tabIconSelected: tintColorDark,
+    green: "#27ae60",
+    red: "#b33939",
   },
 };
