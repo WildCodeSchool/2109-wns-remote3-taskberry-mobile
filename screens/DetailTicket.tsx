@@ -1,25 +1,47 @@
 import {
   View,
-  ScrollView,
   Text,
   StyleSheet,
   TextInput,
   Pressable,
   Image,
-  FlatList,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from "react-native";
-import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons, Entypo } from "@expo/vector-icons";
 import React, { useState, useContext, useEffect } from "react";
 import image from "../constants/Images";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
+import { useMutation, useQuery } from "@apollo/client";
 import { TicketContext } from "../providers/TicketProvider";
-import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 import API from "../constants/API";
-import AppLoading from "expo-app-loading";
+import { initializeApp } from "firebase/app";
+import { getStorage, ref, uploadBytes } from "firebase/storage";
+import MessageBanner, { MessageBannerProps } from "../components/MessageBanner";
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+} from "@env";
+import TicketMediaList from "../components/TicketMediaList";
 import { DateTime } from "luxon";
+
+const firebaseConfig = {
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const storage = getStorage(firebaseApp);
 
 const RenderMessage = ({ props }: any): JSX.Element => {
   return (
@@ -49,12 +71,25 @@ const RenderMessage = ({ props }: any): JSX.Element => {
 const DetailTicket = (): JSX.Element => {
   const { ticket } = useContext(TicketContext);
   const [selectedValue, setSelectedValue] = useState(ticket?.statusId);
-  const [asset1, setAsset1] = useState(null);
-  const [asset2, setAsset2] = useState(null);
-  const [asset, setAsset] = useState<number | null>(null);
+  const [fileToUpload, setFileToUpload] = useState<
+    ImagePicker.ImageInfo | DocumentPicker.DocumentResult | null
+  >(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [updateTicket] = useMutation(API.mutation.UPDATE_TICKET);
-  const [addComment] = useMutation(API.mutation.CREATE_COMMENT);
+  const [messageBannerVisible, setMessageBannerVisible] = useState<
+    MessageBannerProps & { visible: boolean }
+  >({
+    visible: false,
+    text: "",
+  });
+  const [updateTicket] = useMutation(
+    API.mutation.UPDATE_TICKET
+  );
+  const [createMedia] = useMutation(
+    API.mutation.CREATE_MEDIA
+  );
+  const [addComment] = useMutation(
+    API.mutation.CREATE_COMMENT
+  );
   const [message, setMessage] = useState<string>("");
   const { data, loading, error } = useQuery<
     CommentsTicketData,
@@ -65,46 +100,93 @@ const DetailTicket = (): JSX.Element => {
     },
   });
 
-  if (error) {
-    throw new Error(error.message);
-  }
+  useEffect(() => {
+    if (fileToUpload) {
+      setModalVisible(false);
+      uploadFile(fileToUpload);
+    }
+  }, [fileToUpload]);
 
-  if (loading) {
-    return <AppLoading />;
-  }
+  const selectFile = async (mode: string): Promise<void> => {
+    if (mode === "camera") {
+      let result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        aspect: [4, 3],
+        quality: 1,
+      });
 
-  const pickFile = async (num: number): Promise<void> => {
-    // No permissions request is necessary for launching the image library
-    let result: any = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      aspect: [4, 3],
-      quality: 1,
+      if (!result.cancelled) {
+        setFileToUpload(result);
+      }
+    } else if (mode === "storage") {
+      let result = await DocumentPicker.getDocumentAsync();
+
+      if (result.type !== "cancel") {
+        setFileToUpload(result);
+      }
+    }
+  };
+
+  const uploadFile = async (file: any) => {
+    setMessageBannerVisible({
+      visible: true,
+      text: "Chargement...",
+      color: "#dadada",
+    });
+    const blob: ArrayBuffer = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", file.uri, true);
+      xhr.send(null);
     });
 
-    if (!result.cancelled) {
-      if (asset === 1) {
-        switch (num) {
-          case 1:
-            setAsset1(result);
-            break;
-          case 2:
-            setAsset2(result);
-            break;
-          default:
-            break;
-        }
-      } else if (asset === 2) {
-        switch (num) {
-          case 1:
-            setAsset1(result);
-            break;
-          case 2:
-            setAsset2(result);
-            break;
-          default:
-            break;
-        }
-      }
+    const ext = file.uri.split(".")[3];
+    const folder = `/tickets/${ticket?.id}`;
+
+    const path = `${folder}/${file.name}`;
+    const fileRef = ref(storage, path);
+
+    try {
+      const { metadata } = await uploadBytes(fileRef, blob);
+      const storedURL = `https://storage.googleapis.com/${metadata.bucket}/${metadata.fullPath}`;
+
+      createMedia({
+        variables: {
+          mediaInput: {
+            name: file.name,
+            type: file.mimeType,
+            ticketId: Number(ticket?.id),
+            createdAt: metadata.timeCreated,
+            url: storedURL,
+          },
+        },
+      });
+
+      setFileToUpload(null);
+      setMessageBannerVisible({
+        visible: true,
+        text: "Fichier envoyé",
+        success: true,
+        dismissable: true,
+        onDismissPress: () =>
+          setMessageBannerVisible({ visible: false, text: "" }),
+      });
+    } catch (e) {
+      console.error(e);
+      setMessageBannerVisible({
+        visible: true,
+        text: "Fichier trop volumineux (5Mo max.)",
+        error: true,
+        dismissable: true,
+        onDismissPress: () =>
+          setMessageBannerVisible({ visible: false, text: "" }),
+      });
     }
   };
 
@@ -144,43 +226,18 @@ const DetailTicket = (): JSX.Element => {
       .catch((err) => console.log(err));
   };
 
-  const pickImage = async (num: number): Promise<void> => {
-    // No permissions request is necessary for launching the image library
-    let result: any = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-      if (asset === 1) {
-        switch (num) {
-          case 1:
-            setAsset1(result);
-            break;
-          case 2:
-            setAsset2(result);
-            break;
-          default:
-            break;
-        }
-      } else if (asset === 2) {
-        switch (num) {
-          case 1:
-            setAsset1(result);
-            break;
-          case 2:
-            setAsset2(result);
-            break;
-          default:
-            break;
-        }
-      }
-    }
-  };
-
   return (
-    <ScrollView>
+    <>
+      {messageBannerVisible.visible && (
+        <MessageBanner
+          text={messageBannerVisible.text}
+          success={messageBannerVisible.success}
+          error={messageBannerVisible.error}
+          dismissable={messageBannerVisible.dismissable}
+          onDismissPress={messageBannerVisible.onDismissPress}
+        />
+      )}
+
       <View
         style={{
           backgroundColor: "white",
@@ -218,40 +275,25 @@ const DetailTicket = (): JSX.Element => {
         <View style={styles.taskContainer}>
           <Text style={styles.taskText}>{ticket?.description}</Text>
         </View>
-        <View
-          style={{
-            justifyContent: "space-evenly",
-            flexDirection: "row",
-            marginTop: 30,
-            width: "100%",
-            paddingHorizontal: 30,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              setModalVisible(true);
-              setAsset(1);
-            }}
-          >
-            <Text>
-              <AntDesign name="download" size={24} color="black" />
-              <Text style={styles.text}> Asset 1</Text>
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setModalVisible(true);
-              setAsset(2);
-            }}
-          >
-            <Text>
-              <AntDesign name="download" size={24} color="black" />
-              <Text style={styles.text}> Asset 2</Text>
-            </Text>
-          </TouchableOpacity>
-        </View>
 
-        {/* START COMMENT */}
+        {ticket?.id && <TicketMediaList ticketId={ticket.id} />}
+
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginVertical: 20,
+          }}
+          onPress={() => setModalVisible(true)}
+        >
+          <Entypo
+            name="attachment"
+            size={22}
+            color="black"
+            style={{ marginRight: 5 }}
+          />
+          <Text style={styles.text}>Ajouter un fichier</Text>
+        </TouchableOpacity>
 
         <View style={styles.chatContainer}>
           <ScrollView>
@@ -271,16 +313,11 @@ const DetailTicket = (): JSX.Element => {
             </Pressable>
           </View>
         </View>
-
-        {/* END COMMENT */}
-
         <Modal
           animationType="slide"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
+          onRequestClose={() => setModalVisible(!modalVisible)}
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
@@ -292,10 +329,7 @@ const DetailTicket = (): JSX.Element => {
               </Pressable>
               <TouchableOpacity
                 style={styles.modalButton}
-                onPress={() => {
-                  pickImage(1);
-                  setModalVisible(!modalVisible);
-                }}
+                onPress={() => selectFile("camera")}
               >
                 <Text>
                   <Ionicons name="camera" size={50} color="black" />
@@ -303,10 +337,7 @@ const DetailTicket = (): JSX.Element => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalButton}
-                onPress={() => {
-                  pickFile(2);
-                  setModalVisible(!modalVisible);
-                }}
+                onPress={() => selectFile("storage")}
               >
                 <Text>
                   <AntDesign name="download" size={50} color="black" />
@@ -316,7 +347,7 @@ const DetailTicket = (): JSX.Element => {
           </View>
         </Modal>
       </View>
-    </ScrollView>
+    </>
   );
 };
 
@@ -347,7 +378,6 @@ const styles = StyleSheet.create({
     width: "90%",
     height: 330,
     borderRadius: 10,
-    marginTop: 30,
     padding: 10,
   },
   chatText: {
